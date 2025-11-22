@@ -1076,6 +1076,35 @@ export interface ToolListChangedNotification extends JSONRPCNotification {
 }
 
 /**
+ * Security scheme indicating no authentication is required.
+ *
+ * @category `tools/list`
+ */
+export interface NoAuthSecurityScheme {
+  type: "noauth";
+}
+
+/**
+ * Security scheme indicating OAuth 2.0 authentication is required.
+ *
+ * @category `tools/list`
+ */
+export interface OAuth2SecurityScheme {
+  type: "oauth2";
+  /**
+   * Optional list of OAuth 2.0 scopes required for this tool.
+   */
+  scopes?: string[];
+}
+
+/**
+ * A security scheme that can be used to authenticate tool calls.
+ *
+ * @category `tools/list`
+ */
+export type SecurityScheme = NoAuthSecurityScheme | OAuth2SecurityScheme;
+
+/**
  * Additional properties describing a Tool to clients.
  *
  * NOTE: all properties in ToolAnnotations are **hints**.
@@ -1169,6 +1198,13 @@ export interface Tool extends BaseMetadata, Icons {
    * Display name precedence order is: title, annotations.title, then name.
    */
   annotations?: ToolAnnotations;
+
+  /**
+   * Optional list of security schemes supported by this tool.
+   * If missing, the tool follows the server's default authentication policy.
+   * If present, lists the supported authentication schemes (e.g., "noauth", "oauth2").
+   */
+  securitySchemes?: SecurityScheme[];
 
   /**
    * See [General fields: `_meta`](/specification/draft/basic/index#meta) for notes on `_meta` usage.

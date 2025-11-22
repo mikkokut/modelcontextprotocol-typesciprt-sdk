@@ -935,6 +935,34 @@ export const PromptListChangedNotificationSchema = NotificationSchema.extend({
 
 /* Tools */
 /**
+ * Security scheme indicating no authentication is required.
+ */
+export const NoAuthSecuritySchemeSchema = z.object({
+    type: z.literal('noauth')
+});
+
+/**
+ * Security scheme indicating OAuth 2.0 authentication is required.
+ */
+export const OAuth2SecuritySchemeSchema = z.object({
+    type: z.literal('oauth2'),
+    /**
+     * Optional list of OAuth 2.0 scopes required for this tool.
+     */
+    scopes: z
+        .array(z.string().min(1))
+        .refine((arr) => new Set(arr).size === arr.length, {
+            message: 'Scopes must be unique'
+        })
+        .optional()
+});
+
+/**
+ * A security scheme that can be used to authenticate tool calls.
+ */
+export const SecuritySchemeSchema = z.union([NoAuthSecuritySchemeSchema, OAuth2SecuritySchemeSchema]);
+
+/**
  * Additional properties describing a Tool to clients.
  *
  * NOTE: all properties in ToolAnnotations are **hints**.
@@ -1026,6 +1054,13 @@ export const ToolSchema = z.object({
      * Optional additional tool information.
      */
     annotations: z.optional(ToolAnnotationsSchema),
+
+    /**
+     * Optional list of security schemes supported by this tool.
+     * If missing, the tool follows the server's default authentication policy.
+     * If present, lists the supported authentication schemes (e.g., "noauth", "oauth2").
+     */
+    securitySchemes: z.array(SecuritySchemeSchema).optional(),
 
     /**
      * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
@@ -1946,6 +1981,9 @@ export type GetPromptResult = Infer<typeof GetPromptResultSchema>;
 export type PromptListChangedNotification = Infer<typeof PromptListChangedNotificationSchema>;
 
 /* Tools */
+export type NoAuthSecurityScheme = Infer<typeof NoAuthSecuritySchemeSchema>;
+export type OAuth2SecurityScheme = Infer<typeof OAuth2SecuritySchemeSchema>;
+export type SecurityScheme = Infer<typeof SecuritySchemeSchema>;
 export type ToolAnnotations = Infer<typeof ToolAnnotationsSchema>;
 export type Tool = Infer<typeof ToolSchema>;
 export type ListToolsRequest = Infer<typeof ListToolsRequestSchema>;
