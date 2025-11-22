@@ -129,7 +129,9 @@ out
 .pnp.*
 
 .DS_Store
-dist/
+
+# Include dist for npm
+# dist/
 
 # IDE
 .idea/
